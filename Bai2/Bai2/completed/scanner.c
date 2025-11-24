@@ -23,7 +23,7 @@ extern CharCode charCodes[];
 
 void skipBlank()
 {
-  while (charCodes[currentChar] == CHAR_SPACE)
+  while (currentChar != EOF && charCodes[currentChar] == CHAR_SPACE)
     readChar();
 }
 
@@ -62,7 +62,7 @@ Token *readIdentKeyword(void)
   Token *token = makeToken(TK_IDENT, lineNo, colNo);
   int i = 0;
 
-  while (charCodes[currentChar] == CHAR_LETTER || charCodes[currentChar] == CHAR_DIGIT)
+  while (currentChar != EOF && (charCodes[currentChar] == CHAR_LETTER || charCodes[currentChar] == CHAR_DIGIT))
   {
     if (i < MAX_IDENT_LEN)
     {
@@ -71,7 +71,7 @@ Token *readIdentKeyword(void)
     else
     {
       readChar();
-      while (charCodes[currentChar] == CHAR_LETTER || charCodes[currentChar] == CHAR_DIGIT)
+      while (currentChar != EOF && (charCodes[currentChar] == CHAR_LETTER || charCodes[currentChar] == CHAR_DIGIT))
         readChar();
       token->string[MAX_IDENT_LEN] = '\0';
       error(ERR_IDENTTOOLONG, token->lineNo, token->colNo);
@@ -101,10 +101,8 @@ Token *readNumber(void)
     /* Check for potential overflow */
     if (value > (INT_MAX - digit) / 10)
     {
-      /* On overflow, you could call an error or clamp. Here we clamp to INT_MAX. */
       value = INT_MAX;
       error(ERR_INTOVERFLOW, token->lineNo, token->colNo);
-      /* consume remaining digits */
       do
       {
         readChar();
@@ -121,7 +119,6 @@ Token *readNumber(void)
 
 Token *readConstChar(void)
 {
-  // TODO
   Token *token = makeToken(TK_CHAR, lineNo, colNo);
 
   readChar();
@@ -204,10 +201,8 @@ Token *getToken(void)
     /* if next char is '/', it's a line comment until end of line */
     if (currentChar != EOF && currentChar == '/')
     {
-      /* consume rest of line */
       while (currentChar != EOF && currentChar != '\n')
         readChar();
-      /* consume the newline if present */
       if (currentChar == '\n')
         readChar();
       return getToken();
@@ -227,7 +222,7 @@ Token *getToken(void)
     ln = lineNo;
     cn = colNo;
     readChar();
-    if (charCodes[currentChar] == CHAR_TIMES)
+    if (currentChar != EOF && charCodes[currentChar] == CHAR_TIMES)
     {
       readChar();
       skipComment();

@@ -1,0 +1,15 @@
+PROGRAM Example8;
+VAR
+  a, b: INTEGER;
+  s: STRING;
+  bb: BYTES;
+BEGIN
+  a := 2;
+  b := 10;
+  a := a ** b;    // power operator: 2**10
+  a := a % b;     // modulo operator
+  // line comment: the following loop decrements a until zero
+  REPEAT
+    a := a - 1;
+  UNTIL a = 0;
+END.
