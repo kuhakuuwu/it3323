@@ -1,4 +1,4 @@
-/* 
+/*
  * @copyright (c) 2008, Hedspi, Hanoi University of Technology
  * @author Huu-Duc Nguyen
  * @version 1.0
@@ -43,7 +43,10 @@ void compileIfSt(void);
 void compileElseSt(void);
 void compileWhileSt(void);
 void compileForSt(void);
+void compileRepeatSt(void);
 void compileArguments(void);
+void compileAssignments(void);
+void compileAssignments2(void);
 void compileArguments2(void);
 void compileCondition(void);
 void compileCondition2(void);

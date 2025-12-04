@@ -1,0 +1,20 @@
+PROGRAM Example5;
+VAR x: INTEGER;
+    y: INTEGER;
+    z: INTEGER;
+    count: INTEGER;
+BEGIN
+  (* Test REPEAT...UNTIL *)
+  count := 1;
+  REPEAT
+    count := count + 1
+  UNTIL count = 10;
+  
+  (* Test multiple assignment *)
+  x, y, z := 1, 2, 3;
+  
+  (* Test combined *)
+  REPEAT
+    x, y := y, x + y
+  UNTIL x > 100
+END.
