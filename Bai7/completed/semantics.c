@@ -125,21 +125,18 @@ Object *checkDeclaredLValueIdent(char *name)
 
 void checkIntType(Type *type)
 {
-  // TODO: ĐÃ HOÀN THÀNH
   if (type == NULL || type->typeClass != TP_INT)
     error(ERR_TYPE_INCONSISTENCY, currentToken->lineNo, currentToken->colNo);
 }
 
 void checkCharType(Type *type)
 {
-  // TODO: ĐÃ HOÀN THÀNH
   if (type == NULL || type->typeClass != TP_CHAR)
     error(ERR_TYPE_INCONSISTENCY, currentToken->lineNo, currentToken->colNo);
 }
 
 void checkBasicType(Type *type)
 {
-  // TODO: ĐÃ HOÀN THÀNH
   if (type == NULL)
     error(ERR_INVALID_BASICTYPE, currentToken->lineNo, currentToken->colNo);
 
@@ -149,14 +146,12 @@ void checkBasicType(Type *type)
 
 void checkArrayType(Type *type)
 {
-  // TODO: ĐÃ HOÀN THÀNH
   if (type == NULL || type->typeClass != TP_ARRAY)
     error(ERR_TYPE_INCONSISTENCY, currentToken->lineNo, currentToken->colNo);
 }
 
 void checkTypeEquality(Type *type1, Type *type2)
 {
-  // TODO: ĐÃ HOÀN THÀNH
   if ((type1 == NULL) || (type2 == NULL))
     error(ERR_TYPE_INCONSISTENCY, currentToken->lineNo, currentToken->colNo);
 

@@ -455,30 +455,24 @@ void compileStatement(void)
 
 Type *compileLValue(void)
 {
-  // Phân tích lvalue (giá trị bên trái phép gán)
-  // Có thể là: biến, phần tử mảng, tham số, hoặc tên hàm hiện tại
   Object *var;
   Type *varType;
 
   eat(TK_IDENT);
-  // Kiểm tra identifier có phải là lvalue hợp lệ không
   var = checkDeclaredLValueIdent(currentToken->string);
 
   switch (var->kind)
   {
   case OBJ_VARIABLE:
-    // Nếu là biến mảng, phân tích các chỉ số để lấy kiểu phần tử
     if (var->varAttrs->type->typeClass == TP_ARRAY)
       varType = compileIndexes(var->varAttrs->type);
     else
       varType = var->varAttrs->type;
     break;
   case OBJ_PARAMETER:
-    // Tham số có thể được gán giá trị
     varType = var->paramAttrs->type;
     break;
   case OBJ_FUNCTION:
-    // Tên hàm có thể được gán để set giá trị trả về
     varType = var->funcAttrs->returnType;
     break;
   default:
@@ -491,17 +485,13 @@ Type *compileLValue(void)
 
 void compileAssignSt(void)
 {
-  // Phân tích câu lệnh gán: lvalue := expression
   Type *lvalueType;
   Type *expType;
 
-  // Lấy kiểu của vế trái
   lvalueType = compileLValue();
   eat(SB_ASSIGN);
-  // Lấy kiểu của vế phải
   expType = compileExpression();
 
-  // Kiểm tra hai vế phải cùng kiểu
   checkTypeEquality(lvalueType, expType);
 }
 
@@ -550,7 +540,6 @@ void compileWhileSt(void)
 
 void compileForSt(void)
 {
-  // Phân tích câu lệnh FOR: FOR var := exp1 TO exp2 DO statement
   Type *varType;
   Type *type1;
   Type *type2;
@@ -559,19 +548,15 @@ void compileForSt(void)
   eat(KW_FOR);
   eat(TK_IDENT);
 
-  // Biến điều khiển phải được khai báo trước
   var = checkDeclaredVariable(currentToken->string);
   varType = var->varAttrs->type;
 
   eat(SB_ASSIGN);
-  // Giá trị bắt đầu phải cùng kiểu với biến
   type1 = compileExpression();
   checkTypeEquality(varType, type1);
-  // Biến FOR phải là kiểu INTEGER
   checkIntType(varType);
 
   eat(KW_TO);
-  // Giá trị kết thúc phải cùng kiểu với biến
   type2 = compileExpression();
   checkTypeEquality(varType, type2);
 
@@ -581,27 +566,22 @@ void compileForSt(void)
 
 void compileArgument(Object *param)
 {
-  // Phân tích một đối số và kiểm tra tương thích với tham số tương ứng
   Type *argType;
 
-  // Tham số truyền giá trị: chấp nhận expression bất kỳ
   if (param->paramAttrs->kind == PARAM_VALUE)
   {
     argType = compileExpression();
   }
   else
   {
-    // Tham số truyền tham chiếu (VAR): phải là lvalue
     argType = compileLValue();
   }
 
-  // Kiểm tra kiểu đối số khớp với kiểu tham số
   checkTypeEquality(argType, param->paramAttrs->type);
 }
 
 void compileArguments(ObjectNode *paramList)
 {
-  // Phân tích danh sách đối số và kiểm tra tương thích với danh sách tham số
   ObjectNode *node = paramList;
 
   switch (lookAhead->tokenType)
@@ -609,20 +589,16 @@ void compileArguments(ObjectNode *paramList)
   case SB_LPAR:
     eat(SB_LPAR);
 
-    // Phải có ít nhất một tham số nếu có dấu ngoặc
     if (node == NULL)
       error(ERR_PARAMETERS_ARGUMENTS_INCONSISTENCY, currentToken->lineNo, currentToken->colNo);
 
-    // Xử lý đối số đầu tiên
     compileArgument(node->object);
     node = node->next;
 
-    // Xử lý các đối số còn lại
     while (lookAhead->tokenType == SB_COMMA)
     {
       eat(SB_COMMA);
 
-      // Số đối số không được vượt quá số tham số
       if (node == NULL)
         error(ERR_PARAMETERS_ARGUMENTS_INCONSISTENCY, currentToken->lineNo, currentToken->colNo);
 
@@ -630,13 +606,11 @@ void compileArguments(ObjectNode *paramList)
       node = node->next;
     }
 
-    // Phải cung cấp đủ số đối số cho tất cả tham số
     if (node != NULL)
       error(ERR_PARAMETERS_ARGUMENTS_INCONSISTENCY, currentToken->lineNo, currentToken->colNo);
 
     eat(SB_RPAR);
     break;
-    // Check FOLLOW set
   case SB_TIMES:
   case SB_SLASH:
   case SB_PLUS:
@@ -664,16 +638,12 @@ void compileArguments(ObjectNode *paramList)
 
 void compileCondition(void)
 {
-  // Phân tích điều kiện: expression1 comparator expression2
   Type *type1;
   Type *type2;
 
-  // Biểu thức bên trái
   type1 = compileExpression();
-  // Chỉ cho phép so sánh kiểu cơ bản (INT hoặc CHAR)
   checkBasicType(type1);
 
-  // Toán tử so sánh: =, !=, <, <=, >, >=
   switch (lookAhead->tokenType)
   {
   case SB_EQ:
@@ -698,7 +668,6 @@ void compileCondition(void)
     error(ERR_INVALID_COMPARATOR, lookAhead->lineNo, lookAhead->colNo);
   }
 
-  // Biểu thức bên phải phải cùng kiểu với bên trái
   type2 = compileExpression();
   checkTypeEquality(type1, type2);
 }
@@ -753,7 +722,6 @@ void compileExpression3(void)
     checkIntType(type);
     compileExpression3();
     break;
-    // check the FOLLOW set
   case KW_TO:
   case KW_DO:
   case SB_RPAR:
@@ -803,7 +771,6 @@ void compileTerm2(void)
     checkIntType(type);
     compileTerm2();
     break;
-    // check the FOLLOW set
   case SB_PLUS:
   case SB_MINUS:
   case KW_TO:
@@ -829,31 +796,26 @@ void compileTerm2(void)
 
 Type *compileFactor(void)
 {
-  // Phân tích một factor (thành phần cơ bản của biểu thức) và trả về kiểu
   Object *obj;
   Type *type = NULL;
 
   switch (lookAhead->tokenType)
   {
   case TK_NUMBER:
-    // Hằng số nguyên -> kiểu INT
     eat(TK_NUMBER);
     type = intType;
     break;
   case TK_CHAR:
-    // Hằng ký tự -> kiểu CHAR
     eat(TK_CHAR);
     type = charType;
     break;
   case TK_IDENT:
     eat(TK_IDENT);
-    // Kiểm tra identifier đã được khai báo
     obj = checkDeclaredIdent(currentToken->string);
 
     switch (obj->kind)
     {
     case OBJ_CONSTANT:
-      // Hằng số: lấy kiểu từ giá trị hằng
       switch (obj->constAttrs->value->type)
       {
       case TP_INT:
@@ -867,18 +829,15 @@ Type *compileFactor(void)
       }
       break;
     case OBJ_VARIABLE:
-      // Biến: nếu là mảng thì cần chỉ số, không thì lấy kiểu trực tiếp
       if (obj->varAttrs->type->typeClass == TP_ARRAY)
         type = compileIndexes(obj->varAttrs->type);
       else
         type = obj->varAttrs->type;
       break;
     case OBJ_PARAMETER:
-      // Tham số: lấy kiểu của tham số
       type = obj->paramAttrs->type;
       break;
     case OBJ_FUNCTION:
-      // Gọi hàm: phân tích đối số và lấy kiểu trả về
       compileArguments(obj->funcAttrs->paramList);
       type = obj->funcAttrs->returnType;
       break;
@@ -896,28 +855,22 @@ Type *compileFactor(void)
 
 Type *compileIndexes(Type *arrayType)
 {
-  // Phân tích chuỗi các chỉ số mảng: [exp1].[exp2]...[expN]
-  // Kiểm tra tính hợp lệ và trả về kiểu phần tử cuối cùng
   Type *type = arrayType;
   Type *indexType;
 
   while (lookAhead->tokenType == SB_LSEL)
   {
-    eat(SB_LSEL); // Ăn dấu '(.'
+    eat(SB_LSEL);
 
-    // Kiểm tra type hiện tại phải là mảng
     checkArrayType(type);
-    // Chỉ số phải là biểu thức kiểu INTEGER
     indexType = compileExpression();
     checkIntType(indexType);
 
-    // Lấy kiểu phần tử của mảng để tiếp tục kiểm tra (trường hợp mảng nhiều chiều)
     type = type->elementType;
 
-    eat(SB_RSEL); // Ăn dấu '.)'
+    eat(SB_RSEL);
   }
 
-  // Trả về kiểu phần tử cuối cùng sau khi truy cập tất cả các chỉ số
   return type;
 }
 
