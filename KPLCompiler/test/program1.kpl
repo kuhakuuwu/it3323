@@ -1,0 +1,27 @@
+Program program1;
+
+Var a : Integer;
+    b : Integer;
+    sum : Integer;
+    diff : Integer;
+    prod : Integer;
+
+Begin
+  a := 10;
+  b := 5;
+  
+  (* Compute and print the sum of a and b *)
+  sum := a + b;
+  Call WriteI(sum);
+  Call WriteLn;
+  
+  (* Compute and print the difference (a - b) *)
+  diff := a - b;
+  Call WriteI(diff);
+  Call WriteLn;
+  
+  (* Compute and print the product (a * b) *)
+  prod := a * b;
+  Call WriteI(prod);
+  Call WriteLn
+End.

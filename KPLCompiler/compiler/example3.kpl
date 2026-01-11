@@ -1,0 +1,39 @@
+Program  Example3;  (* TOWER OF HANOI *)
+Var  I:Integer;  
+     N:Integer;  
+     P:Integer;  
+     Q:Integer;
+     C:Char;
+
+Procedure  Hanoi(N:Integer;  S:Integer;  Z:Integer);
+Begin
+  If  N != 0  Then
+    Begin
+      Call  Hanoi(N-1,S,6-S-Z);
+      I:=I+1;  
+      Call  WriteLn;
+      Call  WriteI(I);  
+      Call  WriteI(N);
+      Call  WriteI(S);  
+      Call  WriteI(Z);
+      Call  Hanoi(N-1,6-S-Z,Z)
+    End
+End;  (*END OF HANOI*)
+
+Begin
+  For  N := 1  To  4  Do  
+    Begin
+      For  I:=1  To  4  Do  
+        Call  WriteC(' ');
+        C := ReadC;  
+        Call  WriteC(C);
+    End;
+  P:=1;  
+  Q:=2;
+  For  N:=2  To  4  Do
+    Begin  
+      I:=0;  
+      Call  Hanoi(N,P,Q);  
+      Call  WriteLn;
+    End
+End.  (* TOWER OF HANOI *)
