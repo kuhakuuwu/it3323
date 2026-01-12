@@ -5,6 +5,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "reader.h"
 #include "scanner.h"
@@ -481,18 +482,157 @@ Type *compileLValue(void)
   return varType;
 }
 
-void compileAssignSt(void)
+void compileAssignSt(void) // Co the gan nhieu bien
 {
-  Type *varType;
-  Type *expType;
+  Type *lvalueTypes[50]; // Luu tru cac kieu cua bien ben trai
+  Type *expTypes[50];    // Luu tru cac kieu cua bieu thuc ben phai
+  int count = 0;
+  int i;
 
-  varType = compileLValue();
+  // Truong hop dac biet: Phai doc tat ca bien truoc de biet co phai gan nhieu bien khong
+  // Vi du: "a := 1" vs "a, b := 1, 2"
+  // Luu tam cac token cua bien
+  Token *savedTokens[50];
+  int savedCount = 0;
+
+  // Doc va luu toan bo bien ben trai
+  savedTokens[savedCount] = makeToken(lookAhead->tokenType, lookAhead->lineNo, lookAhead->colNo);
+  strcpy(savedTokens[savedCount]->string, lookAhead->string);
+  savedTokens[savedCount]->value = lookAhead->value;
+  savedCount++;
+
+  eat(TK_IDENT);
+
+  // Kiem tra xem co phai array index khong
+  int hasIndex = 0;
+  if (lookAhead->tokenType == SB_LSEL)
+  {
+    hasIndex = 1;
+    // Luu ca cac index (de don gian, chi xu ly array 1 chieu)
+  }
+
+  while (lookAhead->tokenType == SB_COMMA)
+  {
+    eat(SB_COMMA);
+    savedTokens[savedCount] = makeToken(lookAhead->tokenType, lookAhead->lineNo, lookAhead->colNo);
+    strcpy(savedTokens[savedCount]->string, lookAhead->string);
+    savedTokens[savedCount]->value = lookAhead->value;
+    savedCount++;
+    eat(TK_IDENT);
+  }
 
   eat(SB_ASSIGN);
-  expType = compileExpression();
-  checkTypeEquality(varType, expType);
 
-  genST();
+  // Neu chi co 1 bien - xu ly don gian
+  if (savedCount == 1 && !hasIndex)
+  {
+    Object *var = checkDeclaredLValueIdent(savedTokens[0]->string);
+    Type *varType;
+
+    switch (var->kind)
+    {
+    case OBJ_VARIABLE:
+      genVariableAddress(var);
+      varType = var->varAttrs->type;
+      break;
+    case OBJ_PARAMETER:
+      if (var->paramAttrs->kind == PARAM_VALUE)
+        genParameterAddress(var);
+      else
+        genParameterValue(var);
+      varType = var->paramAttrs->type;
+      break;
+    case OBJ_FUNCTION:
+      genReturnValueAddress(var);
+      varType = var->funcAttrs->returnType;
+      break;
+    default:
+      error(ERR_INVALID_LVALUE, savedTokens[0]->lineNo, savedTokens[0]->colNo);
+    }
+
+    Type *expType = compileExpression();
+    checkTypeEquality(varType, expType);
+    genST();
+
+    for (i = 0; i < savedCount; i++)
+      free(savedTokens[i]);
+    return;
+  }
+
+  // Gan nhieu bien: Can xen ke addr va value
+  // Compile bien dau tien
+  Object *var = checkDeclaredLValueIdent(savedTokens[0]->string);
+  switch (var->kind)
+  {
+  case OBJ_VARIABLE:
+    genVariableAddress(var);
+    lvalueTypes[0] = var->varAttrs->type;
+    break;
+  case OBJ_PARAMETER:
+    if (var->paramAttrs->kind == PARAM_VALUE)
+      genParameterAddress(var);
+    else
+      genParameterValue(var);
+    lvalueTypes[0] = var->paramAttrs->type;
+    break;
+  case OBJ_FUNCTION:
+    genReturnValueAddress(var);
+    lvalueTypes[0] = var->funcAttrs->returnType;
+    break;
+  default:
+    error(ERR_INVALID_LVALUE, savedTokens[0]->lineNo, savedTokens[0]->colNo);
+  }
+
+  // Compile expression dau tien
+  expTypes[0] = compileExpression();
+  count = 1;
+
+  // Compile cac cap con lai
+  for (i = 1; i < savedCount; i++)
+  {
+    eat(SB_COMMA);
+
+    var = checkDeclaredLValueIdent(savedTokens[i]->string);
+    switch (var->kind)
+    {
+    case OBJ_VARIABLE:
+      genVariableAddress(var);
+      lvalueTypes[i] = var->varAttrs->type;
+      break;
+    case OBJ_PARAMETER:
+      if (var->paramAttrs->kind == PARAM_VALUE)
+        genParameterAddress(var);
+      else
+        genParameterValue(var);
+      lvalueTypes[i] = var->paramAttrs->type;
+      break;
+    case OBJ_FUNCTION:
+      genReturnValueAddress(var);
+      lvalueTypes[i] = var->funcAttrs->returnType;
+      break;
+    default:
+      error(ERR_INVALID_LVALUE, savedTokens[i]->lineNo, savedTokens[i]->colNo);
+    }
+
+    expTypes[i] = compileExpression();
+    count++;
+  }
+
+  // Kiem tra kieu
+  for (i = 0; i < count; i++)
+  {
+    checkTypeEquality(lvalueTypes[i], expTypes[i]);
+  }
+
+  // Sinh ma ST theo thu tu nguoc
+  for (i = count - 1; i >= 0; i--)
+  {
+    genST();
+  }
+
+  // Giai phong bo nho
+  for (i = 0; i < savedCount; i++)
+    free(savedTokens[i]);
 }
 
 void compileCallSt(void)

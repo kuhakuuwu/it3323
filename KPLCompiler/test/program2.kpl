@@ -7,6 +7,6 @@ Var a: Integer;
 Begin
     a := ReadI;
     b := ReadI;
-    n := a%b;
+    n := a/b;
     Call WriteI(n);
 End.

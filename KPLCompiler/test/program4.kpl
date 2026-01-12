@@ -1,0 +1,20 @@
+(* Tinh tong cac chu so cua mot so *)
+
+Program program4;
+
+Var a : Integer;
+    tmp : Integer;
+    sum : Integer;
+
+Begin
+    sum := 0;
+    a := ReadI;
+    While a > 0 Do
+        Begin
+            tmp := a;
+            a := a/10;
+            sum := sum + (tmp - a * 10);
+        End;
+    
+    Call WriteI(sum);
+End.

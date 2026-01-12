@@ -1,0 +1,34 @@
+(* Test gan dong thoi nhieu bien *)
+
+Program TestMultiAssign;
+
+Var a : Integer;
+    b : Integer;
+    c : Integer;
+    x : Char;
+    y : Char;
+
+Begin
+    (* Gan don - binh thuong *)
+    a := 10;
+    
+    (* Gan dong thoi 2 bien *)
+    a, b := 5, 15;
+    
+    (* Gan dong thoi 3 bien *)
+    a, b, c := 1, 2, 3;
+    
+    (* In ket qua *)
+    Call WriteI(a);
+    Call WriteLn;
+    Call WriteI(b);
+    Call WriteLn;
+    Call WriteI(c);
+    Call WriteLn;
+    
+    (* Gan ky tu *)
+    x, y := 'A', 'B';
+    Call WriteC(x);
+    Call WriteC(y);
+    Call WriteLn;
+End.

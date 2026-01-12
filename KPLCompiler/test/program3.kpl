@@ -1,0 +1,20 @@
+(* Chuong trinh tinh giai thua *)
+Program program3;
+
+Var n : Integer;
+    res : Integer;
+
+Begin
+    n := ReadI;
+    res := 1;
+    
+    While n > 0 Do
+        Begin
+            res := res * n;
+            n := n - 1;
+        End;
+    
+    Call WriteI(res);
+End.
+
+    

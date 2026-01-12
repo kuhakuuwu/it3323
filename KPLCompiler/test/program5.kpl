@@ -1,0 +1,32 @@
+(* In ra man hinh thong tin vua nhap *)
+
+Program program5;
+
+Const MAX = 50;
+Type String = Array(. 50 .) Of Char;
+Var str : String;
+    i : Integer;
+    ch : Char;
+
+Begin
+    i := 0;
+    While i < 50 Do
+        Begin
+            ch := ReadC;
+            str(.i.) := ch;
+            i := i + 1;
+            If ch = '.' Then
+                i := 50;  (* Thoat vong lap khi gap "." *)
+            If ch = '!' Then
+                i := 50;  (* Thoat vong lap khi gap "!" *)
+            If ch = '?' Then
+                i := 50;  (* Thoat vong lap khi gap "?" *)
+        End;
+
+    i := 0;
+    While i < 50 Do
+        Begin
+            Call WriteC(str(.i.));
+            i := i + 1;
+        End;
+End.
